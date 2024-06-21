@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Multiplicaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-container button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-container button:hover {
+            background-color: #45a049;
+        }
+
+        .next-button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .next-button:hover {
+            background-color: #007B9E;
+        }
+
+        #score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        #timer {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ff0000; /* Color rojo para resaltar el temporizador */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Juego de Multiplicaciones</h1>
+        <div id="question-container" class="question-container">
+            <p id="question"></p>
+        </div>
+        <div id="answer-buttons" class="btn-container"></div>
+        <button id="next-button" class="next-button">Siguiente</button>
+        <p id="score">Puntuación: 0</p>
+        <p id="timer">Tiempo restante: 10:00</p> <!-- Contenedor para el temporizador -->
+    </div>
+    <script>
+        const questionContainer = document.getElementById('question');
+        const answerButtons = document.getElementById('answer-buttons');
+        const nextButton = document.getElementById('next-button');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+
+        let currentQuestion, score, timerInterval;
+        let timeLeft = 600; // 10 minutos en segundos
+
+        function startGame() {
+            score = 0;
+            timeLeft = 600; // Reiniciar el tiempo a 10 minutos
+            nextButton.classList.add('hide');
+            scoreDisplay.innerText = `Puntuación: ${score}`;
+            updateTimerDisplay();
+            startTimer();
+            showNextQuestion();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.innerText = `Tiempo restante: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            alert(`¡El tiempo se ha acabado! Tu puntuación final es: ${score}`);
+            startGame(); // Reiniciar el juego automáticamente
+        }
+
+        function showNextQuestion() {
+            resetState();
+            currentQuestion = generateQuestion();
+            questionContainer.innerText = `¿Cuánto es ${currentQuestion.a} x ${currentQuestion.b}?`;
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer;
+                button.classList.add('btn');
+                button.addEventListener('click', selectAnswer);
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+            nextButton.classList.add('hide');
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correct = selectedButton.innerText == currentQuestion.correct;
+            if (correct) {
+                score++;
+            }
+            scoreDisplay.innerText = `Puntuación: ${score}`;
+            nextButton.classList.remove('hide');
+        }
+
+        function generateQuestion() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const correct = a * b;
+            const answers = [correct];
+            while (answers.length < 4) {
+                const wrongAnswer = Math.floor(Math.random() * 100) + 1;
+                if (!answers.includes(wrongAnswer)) {
+                    answers.push(wrongAnswer);
+                }
+            }
+            answers.sort(() => Math.random() - 0.5);
+            return { a, b, correct, answers };
+        }
+
+        nextButton.addEventListener('click', showNextQuestion);
+
+        startGame();
+    </script>
+</body>
+</html>
